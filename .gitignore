@@ -1,0 +1,32 @@
+# Neovim
+nvim/.config/nvim/*
+flatpak_configs/.var/app/io.neovim.nvim/*
+!flatpak_configs/.var/app/io.neovim.nvim/init.vim
+!flatpak_configs/.var/app/io.neovim.nvim/init.vim.old
+!flatpak_configs/.var/app/io.neovim.nvim/coc-settings.json
+!flatpak_configs/.var/app/io.neovim.nvim/ftplugin
+
+# Emacs
+emacs/.config/emacs/*
+!emacs/.config/emacs/early-init.el
+!emacs/.config/emacs/init.el
+!emacs/.config/emacs/package-settings.el
+!emacs/.config/emacs/user-settings.el
+!emacs/.config/emacs/install.el
+
+#Other flatpaks
+flatpak_configs
+
+# Mpv
+mpv/.config/mpv/shaders
+flatpak_configs/.var/app/io.mpv.Mpv/config/mpv/shaders
+
+# User systemd
+systemd/.config/systemd/user/*
+!systemd/.config/systemd/user/emacs.service
+
+# Miscellaneous
+.git
+.cache/
+.DS_STORE
+*.cache
