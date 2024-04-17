@@ -16,19 +16,20 @@
  ;; Home profile, under ~/.guix-home/profile.
  (packages (specifications->packages (list "emacs-pgtk-xwidgets"
 					   "firefox"
+					   "python"
 					   "gnome-shell-extension-dash-to-dock"
 					   "neovim"
 					   "google-chrome-stable"
 					   "htop"
 					   "mpv"
 					   "git"
+					   "libvterm"
 					   "rsync"
-					   "coreutils"
 					   "cmake"
 					   "make"
 					   "ninja"
-					   "glibc"
 					   "gcc-toolchain"
+					   "clang-toolchain"
 					   "ripgrep"
 					   "font-google-noto"
 					   "font-google-noto-emoji"
@@ -57,8 +58,8 @@
 			  ("emacs/early-init.el" ,(local-file "emacs/early-init.el"))))
 
 	(simple-service 'git-config
-			home-xdg-configuration-files-service-type
-			`(("git/.gitconfig" ,(local-file "git/.gitconfig"))))
+			 home-xdg-configuration-files-service-type
+			`(("git/.gitconfig" ,(local-file "git/gitconfig"))))
 	
 	(simple-service 'mpv-config
 			home-xdg-configuration-files-service-type

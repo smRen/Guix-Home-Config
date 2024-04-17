@@ -120,6 +120,7 @@
 
 ;; Custom settings for C/C++
 (use-package c-ts-mode
+  :defer t
   :custom
   ;; Indent and code style
   (c-ts-mode-indent-offset 4)
@@ -127,6 +128,7 @@
 
 ;; Custom settings for json-ts
 (use-package json-ts-mode
+  :defer t
   :custom
   (json-ts-mode-indent-offset 8))
 
