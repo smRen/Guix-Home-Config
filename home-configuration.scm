@@ -15,9 +15,7 @@
  ;; Below is the list of packages that will show up in your
  ;; Home profile, under ~/.guix-home/profile.
  (packages (specifications->packages (list "neovim"
-					   "git"
-                                           "glibc-locales"
-					   "nss-certs")))
+					   "git")))
 
  ;; Below is the list of Home services.  To search for available
  ;; services, run 'guix home search KEYWORD' in a terminal.
@@ -31,11 +29,11 @@
                                        "/home/smakey18/Projects/Guix-Home-Config/bash/dot-bash_profile.bash"
                                        "bash_profile")))))
 
-        (simple-service 'env-config
-			home-environment-variables-service-type
-			`(("SSL_CERT_DIR" . "$HOME/.guix-home/profile/etc/ssl/certs")
-			  ("SSL_CERT_FILE" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")
-			  ("GIT_SSL_CAINFO" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")))
+        ;; (simple-service 'env-config
+	;; 		home-environment-variables-service-type
+	;; 		`(("SSL_CERT_DIR" . "$HOME/.guix-home/profile/etc/ssl/certs")
+	;; 		  ("SSL_CERT_FILE" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")
+	;; 		  ("GIT_SSL_CAINFO" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")))
 
         (simple-service 'nvim-config
 			home-xdg-configuration-files-service-type
