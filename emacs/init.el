@@ -1,11 +1,32 @@
+;;; Emacs-config-file --- Summary  -*- lexical-binding:t -*-
+
+;;; Commentary:
+;; Init file for Emacs
+
+;;; Code:
 (use-package emacs
   :config
+  ;; Straight package manager
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name
+          "straight/repos/straight.el/bootstrap.el"
+          (or (bound-and-true-p straight-base-dir)
+              user-emacs-directory)))
+        (bootstrap-version 7))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+  (straight-use-package 'use-package)
+  
   ;; Set side fringes
-  (set-fringe-mode 30)
-  
-  ;; Enable line numbers everywhere
-  ;; (global-display-line-numbers-mode +1)
-  
+  (set-fringe-mode 10)
+
   ;; Disable menu bar, tool bar, and scroll bar
   (menu-bar-mode -1)
   (tool-bar-mode -1)
@@ -23,9 +44,6 @@
   ;; Show column number
   (column-number-mode +1)
 
-  ;; Always use spaces for tabs
-  (indent-tabs-mode -1)
-
   ;; Save minibuffer history
   (savehist-mode +1)
 
@@ -36,10 +54,13 @@
   (recentf-mode +1)
 
   ;; Associate certain files to correct ts-mode
-  (add-to-list 'auto-mode-alist '("CMakeLists.txt" . cmake-ts-mode))
-  (add-to-list 'auto-mode-alist '("^\\.bashrc$" . bash-ts-mode))
-  
+  (add-to-list 'auto-mode-alist '("/CMakeLists\\.txt" . cmake-ts-mode))
+  (add-to-list 'auto-mode-alist '("/\\.bashrc\\'" . bash-ts-mode))
+  (add-to-list 'auto-mode-alist '("/Dockerfile[[:alpha:][:digit:].]*\\'" . dockerfile-ts-mode))
+  (add-to-list 'auto-mode-alist '("/Containerfile[[:alpha:][:digit:].]*\\'" . dockerfile-ts-mode))
+
   ;; Third party packages
+  (defvar package-archives)
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
   (package-initialize)
@@ -48,37 +69,65 @@
   (setq read-process-output-max (* 64 1024 1024))
   (setq process-adaptive-read-buffering nil)
   (setq process-connection-type nil)
-  ;; (let ((process-connection-type nil))
-  ;;   (async-shell-command command buffer))
+
+  ;; Set fonts
+  (add-to-list 'default-frame-alist
+	       '(font . "Hack Nerd Font-11"))
+  (set-face-attribute 'default t :font "Hack Nerd Font-11")
+
+  ;; Start emacs maximized
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+  (add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+  ;; Custom settings in its own file
+  (setq custom-file (concat user-emacs-directory "custom.el"))
+  (load custom-file 'noerror)
+
+  ;;; Prevent Extraneous Tabs
+  (setq-default indent-tabs-mode nil)
 
   :hook
-  ;; Enable eglot in the following modes
-  ;; ((c++-ts-mode bash-ts-mode) .  eglot-ensure)
 
   ;; Enable line modes in programming modes
   (prog-mode . display-line-numbers-mode)
-  
+
+  ;; Enable line modes in specific modes
+  ((Info-mode org-mode) . display-line-numbers-mode)
+
   ;; Do not allow the cursor in the minibuffer prompt
   (minibuffer-setup . cursor-intangible-mode)
 
   :custom
+  ;; Allow pin entry inside of emacs minibuffer
+  (epg-pinentry-mode 'loopback)
+  
   ;; Do not allow the cursor in the minibuffer prompt
   (minibuffer-prompt-properties
    '(read-only t cursor-intangible t face minibuffer-prompt))
 
+  ;; Emacs 28 and newer: Hide commands in M-x which do not apply to the current mode.
+  (read-extended-command-predicate #'command-completion-default-include-p)
+
   ;; Use short answers
   (use-short-answers t)
 
+  ;; Tab first then try complete
+  (tab-always-indent 'complete)
+
   ;; Backup settings
+  (lock-file-name-transforms
+	'(("\\`/.*/\\([^/]+\\)\\'" "~/.emacs.d/aux/\\1" t)))
+  (auto-save-file-name-transforms
+	'(("\\`/.*/\\([^/]+\\)\\'" "~/.emacs.d/aux/\\1" t)))
   (backup-directory-alist
-   `((".*" . ,(concat user-emacs-directory "backups"))))
+	'((".*" . "~/.emacs.d/aux/")))
   (kept-old-versions 2)
   (kept-new-versions 6)
   (vc-make-backup-files t)
   (backup-by-copying t)
   (delete-old-versions t)
   (version-control t)
-  
+
   ;; Disable startup screen and messages
   (inhibit-startup-screen t)
   (inhibit-startup-message t)
@@ -96,64 +145,116 @@
   (scroll-conservatively 101)
   (scroll-preserve-screen-position +1)
 
-  ;; ;; Completion related settings
-  ;; (completion-auto-help 'always)
-  ;; (completion-styles '(flex partial-completion substring))
-  ;; (completion-category-overrides '((file (styles basic substring))))
-  ;; (read-buffer-completion-ignore-case t)
-  ;; (completions-format 'one-column)
-  ;; (completion-auto-select 'second-tab)
-  ;; (completions-detailed t)
-  )
+  :bind
+  ;; Use hippie expand
+  ([remap dabbrev-expand] . hippie-expand)
+  ;; Recent files
+  ("C-x C-r" . consult-recent-file))
 
-(use-package ansi-color
+;; Org mode
+(use-package org
+  :bind (("C-c o s" . org-store-link)
+         ("C-c o c" . org-capture)
+         ("C-c o a" . org-agenda)
+         :map org-mode-map
+         ("C-c o <RET>" . org-meta-return)))
+
+;; ;; Native LSP
+;; (use-package eglot
+;;   :hook ((c++-ts-mode bash-ts-mode typescript-ts-mode) . eglot-ensure)
+;;   :custom
+;;   (eldoc-echo-area-use-multiline-p nil))
+
+;; Native file checking
+;; (use-package flymake
+;;   :hook ((emacs-lisp-mode) . flymake-mode)
+;;   :custom ((flymake-no-changes-timeout 3)))
+
+;; Faster lsp
+;; (use-package eglot-booster
+;;   :after eglot
+;;   :commands (eglot-booster-mode)
+;;   :init
+;;   (eglot-booster-mode))
+
+;; Window history
+(use-package winner
+  :bind (("C-c w u" . winner-undo)
+         ("C-c w r" . winner-redo))
   :config
-  (defun my/ansi-colorize-buffer ()
+  (winner-mode +1))
+
+;; Window movement
+(use-package windmove
+  :bind (("C-c w h" . windmove-left)
+         ("C-c w l" . windmove-right)
+         ("C-c w k" . windmove-up)
+         ("C-c w j" . windmove-down)
+         ("C-c w H" . windmove-swap-states-left)
+         ("C-c w L" . windmove-swap-states-right)
+         ("C-c w K" . windmove-swap-states-up)
+         ("C-c w J" . windmove-swap-states-down)))
+
+;; Add color to compilation buffer
+(use-package ansi-color
+  :commands (ansi-color-apply-on-region)
+  :config
+  (defun smren/ansi-colorize-buffer ()
     (let ((buffer-read-only nil))
       (ansi-color-apply-on-region (point-min) (point-max))))
-  (add-hook 'compilation-filter-hook 'my/ansi-colorize-buffer))
+  (add-hook 'compilation-filter-hook 'smren/ansi-colorize-buffer))
+
+(use-package project
+  :bind (("C-x p F" . flymake-show-project-diagnostics)))
 
 (use-package elec-pair
   :hook
   ;; Enable electric pairs in following modes
   ((c++-ts-mode bash-ts-mode emacs-lisp-mode typescript-ts-mode) . electric-pair-local-mode))
 
+(use-package sh-script
+  :config
+  (add-to-list 'major-mode-remap-alist '(sh-mode . bash-ts-mode)))
+
+(use-package yaml-ts-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-ts-mode)))
+
 ;; Custom settings for C/C++
 (use-package c-ts-mode
-  :defer t
   :custom
   ;; Indent and code style
   (c-ts-mode-indent-offset 4)
-  (c-ts-mode-indent-style 'linux))
+  (c-ts-mode-indent-style 'linux)
+  :config
+  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode)))
+
+(use-package c++-ts-mode
+  :config
+  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode)))
+
+(use-package css-mode
+  :config
+  (add-to-list 'major-mode-remap-alist '(css-mode . css-ts-mode)))
+
+(use-package js
+  :config
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode)))
+
+(use-package typescript-ts-mode
+  :config
+  (setq typescript-ts-mode-indent-offset 4)
+  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode)))
 
 ;; Custom settings for json-ts
 (use-package json-ts-mode
-  :defer t
   :custom
   (json-ts-mode-indent-offset 8))
 
-;; ;; Default minibuffer completion
-;; (use-package icomplete
-;;   :demand t
-;;   :custom
-;;   (completion-styles '(partial-completion substring flex))
-;;   (completion-category-overrides '((file (styles basic substring))))
-;;   ;;  (read-file-name-completion-ignore-case t)
-;;   (read-buffer-completion-ignore-case t)
-;;   ;;  (completion-ignore-case t)
-;;   :config
-;;   ;;  (icomplete-mode)
-;;   ;;  (icomplete-vertical-mode)
-;;   (fido-vertical-mode +1)
-;;   :bind (:map icomplete-minibuffer-map
-;;               ("C-n" . icomplete-forward-completions)
-;;               ("C-p" . icomplete-backward-completions)))
-
-;;;;;;; Third party packages ;;;;;;;
-
-;; ;; Color theme
+;; Color theme
 (use-package doom-themes
-  :ensure t
+  :straight t
+  :commands (doom-themes-visual-bell-config doom-themes-org-config)
   :custom
   (doom-vibrant-brighter-comments t)
   (doom-themes-enable-bold t)
@@ -161,14 +262,15 @@
   (doom-vibrant-brighter-comments t)
   (doom-vibrant-brighter-modeline t)
   (doom-vibrant-padded-modeline t)
-  :config
+  :init
   (load-theme 'doom-vibrant t)
   (doom-themes-visual-bell-config)
   (doom-themes-org-config))
 
 ;; LSP Mode
 (use-package lsp-mode
-  :ensure t
+  :straight t
+  :commands (lsp lsp-booster--advice-final-command lsp-booster--advice-json-parse)
   :init
   ;; For LSP Booster
   (defun lsp-booster--advice-json-parse (old-fn &rest args)
@@ -177,42 +279,48 @@
      (when (equal (following-char) ?#)
        (let ((bytecode (read (current-buffer))))
 	 (when (byte-code-function-p bytecode)
-           (funcall bytecode))))
+	   (funcall bytecode))))
      (apply old-fn args)))
   (advice-add (if (progn (require 'json)
 			 (fboundp 'json-parse-buffer))
-                  'json-parse-buffer
+		  'json-parse-buffer
 		'json-read)
-              :around
-              #'lsp-booster--advice-json-parse)
+	      :around
+	      #'lsp-booster--advice-json-parse)
 
   (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
     "Prepend emacs-lsp-booster command to lsp CMD."
     (let ((orig-result (funcall old-fn cmd test?)))
       (if (and (not test?) ;; for check lsp-server-present?
-               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-               lsp-use-plists
-               (not (functionp 'json-rpc-connection)) ;; native json-rpc
-               (executable-find "emacs-lsp-booster"))
-          (progn
-            (message "Using emacs-lsp-booster for %s!" orig-result)
-            (cons "emacs-lsp-booster" orig-result))
+	       (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+	       lsp-use-plists
+	       (not (functionp 'json-rpc-connection)) ;; native json-rpc
+	       (executable-find "emacs-lsp-booster"))
+	  (progn
+	    (message "Using emacs-lsp-booster for %s!" orig-result)
+	    (cons "emacs-lsp-booster" orig-result))
 	orig-result)))
-  
+
   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
   (setq lsp-keymap-prefix "C-c l")
+
+  (defun my/lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+	  '(orderless))) ;; Configure orderless
+
   :hook (;; Auto start in the following modes
-	 ((c++-ts-mode bash-ts-mode cmake-ts-mode json-ts-mode typescript-ts-mode) . lsp-deferred))
-  :commands (lsp lsp-deferred)
+	 ((c++-ts-mode css-ts-mode bash-ts-mode cmake-ts-mode json-ts-mode typescript-ts-mode dockerfile-ts-mode yaml-ts-mode) . lsp)
+	 (lsp-completion-mode . my/lsp-mode-setup-completion))
   :custom
+  (lsp-completion-provider :none) ;; For corfu
   (lsp-idle-delay 0.1)
   (gc-cons-threshold 100000000)
   (read-process-output-max (* 1024 1024)))
 
 (use-package dap-mode
-  :ensure t
-  :hook ((dap-stopped) . (lambda (arg) (call-interactively #'dap-hydra)))
+  :straight t
+  :hook ((dap-stopped) . (lambda () (call-interactively #'dap-hydra)))
   :config
   (dap-auto-configure-mode +1)
   (require 'dap-cpptools)
@@ -220,44 +328,61 @@
 
 ;; Extra lsp features
 (use-package lsp-ui
-  :ensure t
+  :straight t
   :commands lsp-ui-mode)
+
+(use-package flycheck
+  :straight t
+  :commands (flycheck-add-next-checker)
+  :config
+  (defun smren/elisp-checker ()
+    (flycheck-mode)
+    (flycheck-add-next-checker 'emacs-lisp 'emacs-lisp-checkdoc))
+  :hook
+  ((emacs-lisp-mode smren/elisp-check))
+  :custom
+  (flycheck-idle-change-delay 3))
 
 ;; Better terminal
 (use-package vterm
-  :ensure t
-  :defer t)
+  :straight t)
 
 ;; Markdown
 (use-package markdown-mode
-  :ensure t
-  :defer t)
+  :straight t)
 
 ;; Snippets
 (use-package yasnippet
-  :ensure t
-  :config
-  (yas-reload-all)
-  :hook
-  ;; Enable yas-snippets in the following modes
-  ((c++-ts-mode bash-ts-mode emacs-lisp-mode cmake-ts-mode json-ts-mode typescript-ts-mode) . yas-minor-mode))
+  :straight t)
 
 ;; Actual snippets
 (use-package yasnippet-snippets
-  :ensure t)
+  :straight t)
 
-;; Inline completion
-(use-package company
-  :ensure t
-  :config
-  (setq company-minimum-prefix-length 1
-        company-idle-delay 0.0)
-  :hook
-  (after-init . global-company-mode))
+;; Completions
+(use-package corfu
+  :straight t
+  :commands (global-corfu-mode)
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-delay 0.1)
+  (corfu-auto-prefix 2)
+  (corfu-quit-no-match 'separator)
+  :init
+  :hook ((prog-mode . corfu-mode)
+	 (shell-mode . corfu-mode)
+	 (eshell-mode . corfu-mode)))
+
+;; Git porcelain
+(use-package magit
+  :straight t
+  :bind (("C-c g" . magit-dispatch)
+         ("C-c f" . magit-file-dispatch)))
 
 ;; Example configuration for Consult
 (use-package consult
-  :ensure t
+  :straight t
   :bind (("C-x M-:" . consult-complex-command) ;; orig. repeat-complex-command
 	 ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
 	 ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
@@ -265,12 +390,11 @@
 	 ("C-x t b" . consult-buffer-other-tab) ;; orig. switch-to-buffer-other-tab
 	 ("C-x r b" . consult-bookmark)		;; orig. bookmark-jump
 	 ("C-x p b" . consult-project-buffer) ;; orig. project-switch-to-buffer
-	 
+
 	 ;; Other custom bindings
 	 ("M-y" . consult-yank-pop) ;; orig. yank-pop
 	 ;; M-g bindings in `goto-map'
 	 ("M-g e" . consult-compile-error)
-	 ("M-g f" . consult-flycheck)
 	 ("M-g g" . consult-goto-line)		  ;; orig. goto-line
 	 ("M-g M-g" . consult-goto-line)	  ;; orig. goto-line
 	 ("M-g o" . consult-outline) ;; Alternative: consult-org-heading
@@ -303,118 +427,79 @@
   ;; Enable automatic preview at point in the *Completions* buffer. This is
   ;; relevant when you use the default completion UI.
   :hook (completion-list-mode . consult-preview-at-point-mode)
-
   :config
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   :preview-key '(:debounce 0.4 any))
-
   :custom
   (consult-narrow-key "<")
   (xref-show-xrefs-function #'consult-xref)
   (xref-show-definitions-function #'consult-xref))
 
-(use-package flycheck
-  :ensure t
-  :config
-  (global-flycheck-mode +1))
-  ;;:hook (;; Set multiple checkers for flycheck
-	 ;; Note: Check the LSP for integration
-	 ;; May not be necessary
-	 ;; (lsp-managed-mode . (lambda ()
-	 ;; 		       (flycheck-mode)
-	 ;; 		       (let ((current-prog-mode major-mode))
-	 ;; 			 (cond ((eq current-prog-mode 'c++-ts-mode)
-	 ;; 				(setq flycheck-checker 'c/c++-cppcheck)
-	 ;; 				(flycheck-add-next-checker 'c/c++-cppcheck 'lsp))
-	 ;; 			       ;; ((eq current-prog-mode 'bash-ts-mode)
-	 ;; 			       ;; 	(setq flycheck-checker 'sh-shellcheck)
-	 ;; 			       ;; 	(flycheck-add-next-checker 'sh-shellcheck 'lsp))
-	 ;; 			       ))))
-;;	 ))
-
 (use-package consult-flycheck
-  :ensure t)
+  :straight t
+  :after flycheck
+  :bind (("M-g f" . consult-flycheck)))
 
 (use-package consult-lsp
-  :ensure t
+  :commands (consult-lsp-symbols)
+  :straight t
   :config
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
 
-;; Centered window
-(use-package writeroom-mode
-  :ensure t
-  :defer t)
-
-;; ;; Automated treesitter
+;; For downloading treesit languages
 (use-package treesit-auto
-  :ensure t
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode)
-  :custom
-  (treesit-font-lock-level 4))
+  :straight t)
 
 ;; Autofind python env
 (use-package pet
-  :ensure t
-  :defer t
+  :straight t
   :config
   (add-hook 'python-base-mode-hook 'pet-mode -10))
 
 ;; Minibuffer Completion
 (use-package vertico
-  :ensure t
+  :straight t
+  :commands (vertico-mode)
   :init
   (vertico-mode)
   :custom
   (enable-recursive-minibuffers t)
   (read-buffer-completion-ignore-case t)
-  (completion-styles '(orderless flex basic))
+  (completion-styles '(orderless partial-completion basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides nil)
   (completion-category-overrides '((file (styles basic partial-completion)))))
-
-;; Move minibuffer stuff to middle
-;; Very glitchy
-(use-package vertico-posframe
-  :ensure t
-  :config
-  (vertico-posframe-mode 1))
 
 ;; Completion style
 (use-package orderless
-  :ensure t)
+  :straight t)
 
 ;; Annotations
 (use-package marginalia
-  :ensure t
+  :straight t
+  :commands (marginalia-mode)
   :init
   (marginalia-mode +1))
 
 ;; Icons
-(use-package all-the-icons-completion
-  :ensure t
-  :init
-  (all-the-icons-completion-mode +1)
-  :hook
-  (marginalia-mode . all-the-icons-completion-marginalia-setup))
+(use-package nerd-icons
+  :straight t)
 
-;; Faster lsp
-(use-package eglot-booster
-  :after eglot
+(use-package nerd-icons-completion
+  :straight t
+  :after marginalia
+  :commands (nerd-icons-completion-mode nerd-icons-completion-marginalia-setup)
   :config
-  (eglot-booster-mode))
+  (nerd-icons-completion-mode)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 ;; Project management
 (use-package projectile
-  :ensure t
+  :straight t
+  :commands (projectile-mode)
+  :defines (projectile-mode-map)
   :init
   (projectile-mode +1)
   :bind (:map projectile-mode-map
-              ("C-c p" . projectile-command-map))
+	      ("C-c p" . projectile-command-map))
   :hook
   (project-find-functions . project-projectile)
   :custom
@@ -424,9 +509,10 @@
   (projectile-project-search-path '("~/Projects")))
 
 (use-package consult-projectile
-  :ensure t
+  :straight t
   :bind (:map projectile-mode-map
-	      ([remap projectile-find-file] . consult-projectile-find-file)
+              ([remap projectile-switch-project] . consult-projectile-switch-project)
+              ([remap projectile-find-file] . consult-projectile-find-file)
 	      ([remap projectile-find-dir] . consult-projectile-find-dir)
 	      ([remap projectile-find-file-other-window] . consult-projectile-find-file-other-window)
 	      ([remap projectile-switch-to-buffer-other-window] . consult-projectile-switch-to-buffer-other-window)
@@ -434,32 +520,46 @@
 	      ([remap projectile-switch-to-buffer] . consult-projectile-switch-to-buffer))
   :after projectile)
 
-(use-package ripgrep
-  :ensure t
-  :defer t)
-
-(use-package git-modes
-  :ensure t)
-
 (use-package golden-ratio-scroll-screen
-  :ensure t
+  :straight t
   :bind
   (([remap scroll-down-command] . golden-ratio-scroll-screen-down)
    ([remap scroll-up-command] . golden-ratio-scroll-screen-up)))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(golden-ratio-scroll-screen dap-mode vertico-posframe git-modes ripgrep fancy-compilation yasnippet-snippets writeroom-mode vterm vertico treesit-auto projectile pet orderless marginalia lsp-ui eglot-booster doom-themes consult-lsp consult-flycheck company all-the-icons-completion))
- '(safe-local-variable-values
-   '((projectile-project-run-cmd . "npm run start")
-     (projectile-project-compilation-cmd . "npm run compile"))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+(use-package doom-modeline
+  :straight t
+  :commands (doom-modeline-mode)
+  :init (doom-modeline-mode 1)
+  :custom
+  (doom-modeline-vcs-max-length 30))
+
+(use-package corfu-terminal
+  :straight t
+  :commands (corfu-terminal-mode)
+  :init
+  (unless (display-graphic-p)
+    (corfu-terminal-mode +1)))
+
+(use-package nerd-icons-corfu
+  :straight t
+  :after corfu
+  :defines (corfu-margin-formatters)
+  :commands (nerd-icons-corfu-formatter)
+  :init
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+(use-package git-gutter
+  :straight t
+  :commands (global-git-gutter-mode)
+  :init
+  (global-git-gutter-mode +1))
+
+(use-package exec-path-from-shell
+  :straight t
+  :config
+  (dolist (var '("LANG"))
+    (add-to-list 'exec-path-from-shell-variables var))
+    (when (daemonp)
+      (exec-path-from-shell-initialize)))
+
+;;; Init.el ends here

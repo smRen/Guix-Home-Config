@@ -1,0 +1,14 @@
+{
+    "python.jediEnabled": false,
+    "diagnostic.messageTarget": "float",
+    "signature.target": "float",
+    "coc.preferences.hoverTarget": "float",
+    "suggest.floatEnable": true,
+    "snippets.extends": {
+            "html": ["jinja2","ejs"],
+            "jst": ["ejs","html"]
+    },
+    "javascript.suggestionActions.enabled": false,
+    "javascript.suggest.enabled": false,
+    "javascript.validate.enable": false
+}

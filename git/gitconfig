@@ -1,5 +1,11 @@
 [user]
 	email = smakey18@gmail.com
-	name = Ren Abelard Arriola Odion
+	name = Ren Odion
+	signingkey = 4DF50DFF08E20280
 [init]
 	defaultBranch = main
+[commit]
+	gpgSign = true
+[maintenance]
+	repo = /home/smakey18/Projects/Dotfiles
+	repo = /DistroboxHomes/arch/smakey18/Projects/Dotfiles

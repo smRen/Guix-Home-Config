@@ -14,52 +14,52 @@
 (home-environment
  ;; Below is the list of packages that will show up in your
  ;; Home profile, under ~/.guix-home/profile.
- (packages (specifications->packages (list "emacs-pgtk-xwidgets"
-					   "firefox"
-					   "python"
-					   "gnome-shell-extension-dash-to-dock"
-					   "neovim"
-					   "google-chrome-stable"
-					   "htop"
-					   "mpv"
+ (packages (specifications->packages (list "neovim"
 					   "git"
-					   "libvterm"
-					   "rsync"
-					   "cmake"
-					   "make"
-					   "ninja"
-					   "gcc-toolchain"
-					   "clang-toolchain"
-					   "ripgrep"
-					   "font-google-noto"
-					   "font-google-noto-emoji"
-					   "font-google-noto-sans-cjk"
-					   "gnome-tweaks"
-					   "libva-utils"
-					   "igt-gpu-tools"
-					   "intel-media-driver-nonfree")))
+                                           "glibc-locales"
+					   "nss-certs")))
 
  ;; Below is the list of Home services.  To search for available
  ;; services, run 'guix home search KEYWORD' in a terminal.
  (services
   (list (service home-bash-service-type
                  (home-bash-configuration
-                  (aliases '(("grep" . "grep --color=auto") ("ll" . "ls -l")
-                             ("ls" . "ls -p --color=auto")))
                   (bashrc (list (local-file
-                                 "/home/smakey18/Projects/Guix-Home-Config/.bashrc"
+                                 "/home/smakey18/Projects/Guix-Home-Config/bash/dot-bashrc.bash"
                                  "bashrc")))
                   (bash-profile (list (local-file
-                                       "/home/smakey18/Projects/Guix-Home-Config/.bash_profile"
+                                       "/home/smakey18/Projects/Guix-Home-Config/bash/dot-bash_profile.bash"
                                        "bash_profile")))))
+
+        (simple-service 'env-config
+			home-environment-variables-service-type
+			`(("SSL_CERT_DIR" . "$HOME/.guix-home/profile/etc/ssl/certs")
+			  ("SSL_CERT_FILE" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")
+			  ("GIT_SSL_CAINFO" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")))
+
+        (simple-service 'nvim-config
+			home-xdg-configuration-files-service-type
+			`(("nvim/coc-settings.json" ,(local-file "nvim/coc-settings.json"))
+			  ("nvim/init.vim" ,(local-file "nvim/init.vim"))))
+        
 	(simple-service 'emacs-config
 			home-xdg-configuration-files-service-type
 			`(("emacs/init.el" ,(local-file "emacs/init.el"))
-			  ("emacs/early-init.el" ,(local-file "emacs/early-init.el"))))
+			  ("emacs/early-init.el" ,(local-file "emacs/early-init.el"))
+                          ("emacs/straight/versions/default.el" ,(local-file "emacs/straight/versions/default.el"))))
 
+        (simple-service 'scripts-config
+			home-files-service-type
+			`(("Scripts/git-prompt.sh" ,(local-file "scripts/git-prompt.sh"))))
+        
+        (simple-service 'gnugpg-config
+			home-files-service-type
+			`((".gnupg/gpg-agent.conf" ,(local-file "gpg/gpg-agent.conf"))
+                          (".gnupg/gpg.conf" ,(local-file "gpg/gpg.conf"))))
+        
 	(simple-service 'git-config
 			 home-xdg-configuration-files-service-type
-			`(("git/.gitconfig" ,(local-file "git/gitconfig"))))
+			`(("git/config" ,(local-file "git/gitconfig"))))
 	
 	(simple-service 'mpv-config
 			home-xdg-configuration-files-service-type
