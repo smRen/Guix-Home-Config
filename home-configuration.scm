@@ -15,6 +15,9 @@
  ;; Below is the list of packages that will show up in your
  ;; Home profile, under ~/.guix-home/profile.
  (packages (specifications->packages (list "neovim"
+                                           "emacs"
+                                           "libvterm"
+                                           "tree"
 					   "git")))
 
  ;; Below is the list of Home services.  To search for available
@@ -23,44 +26,32 @@
   (list (service home-bash-service-type
                  (home-bash-configuration
                   (bashrc (list (local-file
-                                 "/home/smakey18/Projects/Guix-Home-Config/bash/dot-bashrc.bash"
-                                 "bashrc")))
+                                 "bash/dot-bashrc.bash")))
                   (bash-profile (list (local-file
-                                       "/home/smakey18/Projects/Guix-Home-Config/bash/dot-bash_profile.bash"
-                                       "bash_profile")))))
+                                       "bash/dot-bash_profile.bash")))))
 
-        ;; (simple-service 'env-config
-	;; 		home-environment-variables-service-type
-	;; 		`(("SSL_CERT_DIR" . "$HOME/.guix-home/profile/etc/ssl/certs")
-	;; 		  ("SSL_CERT_FILE" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")
-	;; 		  ("GIT_SSL_CAINFO" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")))
-
-        (simple-service 'nvim-config
-			home-xdg-configuration-files-service-type
-			`(("nvim/coc-settings.json" ,(local-file "nvim/coc-settings.json"))
-			  ("nvim/init.vim" ,(local-file "nvim/init.vim"))))
+        (service home-xdg-configuration-files-service-type
+                   ;; Neovim config
+		 `(("nvim/coc-settings.json" ,(local-file "nvim/coc-settings.json"))
+		   ("nvim/init.vim" ,(local-file "nvim/init.vim"))
+		   ;; Git config
+                   ("git/config" ,(local-file "git/gitconfig"))
+		   ;; Guix config
+		   ("guix/channels.scm" ,(local-file "guix/channels.scm"))
+                   ;; Kitty config
+                   ("kitty/kitty.conf" ,(local-file "kitty/kitty.conf"))
+                   ;; Mpv config
+                   ("mpv/scripts/nextfile.lua" ,(local-file "mpv/scripts/nextfile.lua"))
+		   ("mpv/input.conf" ,(local-file "mpv/input.conf"))
+		   ("mpv/mpv.conf" ,(local-file "mpv/mpv.conf"))))
         
-	(simple-service 'emacs-config
-			home-xdg-configuration-files-service-type
-			`(("emacs/init.el" ,(local-file "emacs/init.el"))
-			  ("emacs/early-init.el" ,(local-file "emacs/early-init.el"))
-                          ("emacs/straight/versions/default.el" ,(local-file "emacs/straight/versions/default.el"))))
-
-        (simple-service 'scripts-config
-			home-files-service-type
-			`(("Scripts/git-prompt.sh" ,(local-file "scripts/git-prompt.sh"))))
-        
-        (simple-service 'gnugpg-config
-			home-files-service-type
-			`((".gnupg/gpg-agent.conf" ,(local-file "gpg/gpg-agent.conf"))
-                          (".gnupg/gpg.conf" ,(local-file "gpg/gpg.conf"))))
-        
-	(simple-service 'git-config
-			 home-xdg-configuration-files-service-type
-			`(("git/config" ,(local-file "git/gitconfig"))))
-	
-	(simple-service 'mpv-config
-			home-xdg-configuration-files-service-type
-			`(("mpv/scripts/nextfile.lua" ,(local-file "mpv/scripts/nextfile.lua"))
-			  ("mpv/input.conf" ,(local-file "mpv/input.conf"))
-			  ("mpv/mpv.conf" ,(local-file "mpv/mpv.conf")))))))
+	(service home-files-service-type
+                   ;; Git prompt
+		 `(("Scripts/git-prompt.sh" ,(local-file "scripts/git-prompt.sh"))
+		   ;; Emacs config
+                   (".emacs.d/init.el" ,(local-file "emacs/init.el"))
+		   (".emacs.d/early-init.el" ,(local-file "emacs/early-init.el"))
+                   (".emacs.d/straight/versions/default.el" ,(local-file "emacs/straight/versions/default.el"))
+		   ;; GPG
+                   (".gnupg/gpg-agent.conf" ,(local-file "gpg/gpg-agent.conf"))
+                   (".gnupg/gpg.conf" ,(local-file "gpg/gpg.conf")))))))
