@@ -40,8 +40,6 @@
 		   ("nvim/init.vim" ,(local-file "nvim/init.vim"))
 		   ;; Git config
                    ("git/config" ,(local-file "git/gitconfig"))
-		   ;; Guix config
-		   ("guix/channels.scm" ,(local-file "guix/channels.scm"))
                    ;; Kitty config
                    ("kitty/kitty.conf" ,(local-file "kitty/kitty.conf"))
                    ;; Mpv config
