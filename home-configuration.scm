@@ -14,15 +14,27 @@
 (home-environment
  ;; Below is the list of packages that will show up in your
  ;; Home profile, under ~/.guix-home/profile.
- (packages (specifications->packages (list "neovim"
+ (packages (specifications->packages (list "cmake"
  					   "gcc-toolchain"
-                                           "emacs-pgtk-xwidgets"
-                                           "libvterm"
- 					   "cmake"
  					   "make"
+                                           "bash-completion"
+                                           "emacs-pgtk-xwidgets"
+                                           "firefox"
+                                           "git"
+                                           "google-chrome-stable"
+                                           "libvterm"
+                                           "moonlight-qt"
+                                           "neovim"
+                                           "node"
                                            "tree"
+                                           "ungoogled-chromium-wayland"
                                            "virt-manager"
-					   "git")))
+                                           "zsh"
+                                           "zsh-autopair"
+                                           "zsh-autosuggestions"
+                                           "zsh-completions"
+                                           "zsh-history-substring-search"
+                                           "zsh-syntax-highlighting")))
 
  ;; Below is the list of Home services.  To search for available
  ;; services, run 'guix home search KEYWORD' in a terminal.
@@ -35,7 +47,7 @@
                                        "bash/dot-bash_profile.bash")))))
 
         (service home-xdg-configuration-files-service-type
-                   ;; Neovim config
+                 ;; Neovim config
 		 `(("nvim/coc-settings.json" ,(local-file "nvim/coc-settings.json"))
 		   ("nvim/init.vim" ,(local-file "nvim/init.vim"))
 		   ;; Git config
@@ -48,7 +60,7 @@
 		   ("mpv/mpv.conf" ,(local-file "mpv/mpv.conf"))))
         
 	(service home-files-service-type
-                   ;; Git prompt
+                 ;; Git prompt
 		 `(("Scripts/git-prompt.sh" ,(local-file "scripts/git-prompt.sh"))
 		   ;; Emacs config
                    (".emacs.d/init.el" ,(local-file "emacs/init.el"))
