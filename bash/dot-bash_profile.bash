@@ -1,3 +1,19 @@
+# Set up Guix Home profile
+if [ -f ~/.profile ]; then . ~/.profile; fi
+
+# Honor per-interactive-shell startup file
+if [ -f ~/.bashrc ]; then . ~/.bashrc; fi
+
+# Merge search-paths from multiple profiles, the order matters.
+eval "$(guix package --search-paths \
+-p $HOME/.config/guix/current \
+-p $HOME/.guix-home/profile \
+-p $HOME/.guix-profile \
+-p /run/current-system/profile)"
+
+# Prepend setuid programs.
+export PATH=/run/setuid-programs:$PATH
+
 # Add paths
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
@@ -14,15 +30,6 @@ fi
 if [ -d "$HOME/.local/share/flatpak/exports/bin" ]; then
     PATH="$HOME/.local/share/flatpak/exports/bin:$PATH"
 fi
-
-# if running bash
-if [ -n "$BASH_VERSION" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-	. "$HOME/.bashrc"
-    fi
-fi
-
 
 # For Guix on foreign distros
 # Locales
