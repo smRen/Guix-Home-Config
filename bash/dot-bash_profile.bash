@@ -4,6 +4,7 @@ if [ -f ~/.profile ]; then . ~/.profile; fi
 # Honor per-interactive-shell startup file
 if [ -f ~/.bashrc ]; then . ~/.bashrc; fi
 
+PATH_ORIGINAL=$PATH
 # Merge search-paths from multiple profiles, the order matters.
 eval "$(guix package --search-paths \
 -p $HOME/.config/guix/current \
@@ -12,7 +13,7 @@ eval "$(guix package --search-paths \
 -p /run/current-system/profile)"
 
 # Prepend setuid programs.
-export PATH=/run/setuid-programs:$PATH
+export PATH=/run/setuid-programs:$PATH:$PATH_ORIGINAL
 
 # Add paths
 if [ -d "$HOME/bin" ] ; then
