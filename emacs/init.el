@@ -153,6 +153,9 @@
 
 ;; Org mode
 (use-package org
+  :custom
+  (org-directory "~/Projects/Org")
+  (org-default-notes-file (concat org-directory "/notes.org"))
   :bind (("C-c o s" . org-store-link)
          ("C-c o c" . org-capture)
          ("C-c o a" . org-agenda)
