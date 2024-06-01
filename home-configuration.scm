@@ -41,6 +41,7 @@
  (services
   (list (service home-bash-service-type
                  (home-bash-configuration
+                  (guix-defaults? #f)
                   (bashrc (list (local-file
                                  "bash/dot-bashrc.bash")))
                   (bash-profile (list (local-file
