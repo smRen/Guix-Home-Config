@@ -153,9 +153,19 @@
 
 ;; Org mode
 (use-package org
+  :config
+  ;; Enable org mode in the following languages
+  (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+        (shell . t)
+        (python . t)
+        (js . t)
+        (C . t)))
   :custom
   (org-directory "~/Projects/Org")
   (org-default-notes-file (concat org-directory "/notes.org"))
+  (org-confirm-babel-evaluate nil)
   :bind (("C-c o s" . org-store-link)
          ("C-c o c" . org-capture)
          ("C-c o a" . org-agenda)
