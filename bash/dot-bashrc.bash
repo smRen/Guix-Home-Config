@@ -1,23 +1,5 @@
-# Bash initialization for interactive non-login shells and
-# for remote shells (info "(bash) Bash Startup Files").
-
-# Export 'SHELL' to child processes.  Programs such as 'screen'
-# honor it and otherwise use /bin/sh.
-export SHELL
-
-if [[ $- != *i* ]]
-then
-    # We are being invoked from a non-interactive shell.  If this
-    # is an SSH session (as in "ssh host command"), source
-    # /etc/profile so we get PATH and other essential variables.
-    [[ -n "$SSH_CLIENT" ]] && source /etc/profile
-
-    # Don't do anything else.
-    return
-fi
-
-# Source the system-wide file.
-[ -f /etc/bashrc ] && source /etc/bashrc
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
 
 # Load completions and git prompt
 if ! shopt -oq posix; then
@@ -30,27 +12,21 @@ if ! shopt -oq posix; then
     fi
 fi
 
-# Load fzf keybindings inside container
-if [[ -f "/run/.containerenv" ]] ; then
-    DISTRIBUTION_NAME=$(grep -E ^NAME /etc/os-release | sed -nr 's/^NAME="(.*)"/\1/p')
-    if [[ "$DISTRIBUTION_NAME" == *"Arch"* ]]; then
-        . /usr/share/fzf/key-bindings.bash
-        . /usr/share/fzf/completion.bash
-    elif [[ "$DISTRIBUTION_NAME" == *"Ubuntu"* ]]; then
-        . /usr/share/doc/fzf/examples/key-bindings.bash
-        . /usr/share/bash-completion/completions/fzf
-    fi
+DISTRIBUTION_NAME=$(grep -E ^NAME /etc/os-release | sed -nr 's/^NAME="(.*)"/\1/p')
+if [[ "$DISTRIBUTION_NAME" == *"Arch"* ]]; then
+    . /usr/share/fzf/key-bindings.bash
+    . /usr/share/fzf/completion.bash
+elif [[ "$DISTRIBUTION_NAME" == *"Ubuntu"* ]]; then
+    . /usr/share/doc/fzf/examples/key-bindings.bash
+    . /usr/share/bash-completion/completions/fzf
 fi
 
-# GPG allow input of passphrase in tty
+#GPG allow input of passphrase in tty
 TTY=$(tty)
 export GPG_TTY=$TTY
-# Use GPG as ssh-agent
-unset SSH_AGENT_PID
-if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
-  export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-fi
-gpg-connect-agent updatestartuptty /bye >/dev/null
+
+# SSH agent
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
 # Customize prompt
 MAGENTA="\[$(tput setaf 5)\]"
@@ -127,4 +103,3 @@ vterm_cmd() {
 
     vterm_printf "51;E$vterm_elisp"
 }
-
