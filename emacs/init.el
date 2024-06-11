@@ -23,10 +23,14 @@
         (eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
   (straight-use-package 'use-package)
-  
-  ;; Set side fringes
-  (set-fringe-mode 10)
 
+  ;; Desktop mode
+  (unless (daemonp)
+    (desktop-save-mode +1))
+
+  ;; Default theme
+  (load-theme 'modus-vivendi t)
+    
   ;; Disable menu bar, tool bar, and scroll bar
   (menu-bar-mode -1)
   (tool-bar-mode -1)
@@ -65,12 +69,7 @@
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
   (package-initialize)
 
-  ;; Make async shell command faster
-  (setq read-process-output-max (* 64 1024 1024))
-  (setq process-adaptive-read-buffering nil)
-  (setq process-connection-type nil)
-
-  ;; Set fonts
+    ;; Set fonts
   (add-to-list 'default-frame-alist
 	       '(font . "Hack Nerd Font-11"))
   (set-face-attribute 'default t :font "Hack Nerd Font-11")
@@ -148,14 +147,31 @@
   :bind
   ;; Use hippie expand
   ([remap dabbrev-expand] . hippie-expand)
+  ;; Ibuffer
+  ("C-x C-b" . ibuffer-other-window)
   ;; Recent files
   ("C-x C-r" . consult-recent-file))
 
 ;; Org mode
 (use-package org
+  :config
+  ;; Enable org mode in the following languages
+  (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+        (shell . t)
+        (python . t)
+        (js . t)
+        (ruby . t)
+        (C . t)))
   :custom
   (org-directory "~/Projects/Org")
   (org-default-notes-file (concat org-directory "/notes.org"))
+  (org-confirm-babel-evaluate nil)
+  (org-agenda-start-with-log-mode t)
+  (org-log-done 'time)
+  (org-log-into-drawer t)
+  (org-list-allow-alphabetical t)
   :bind (("C-c o s" . org-store-link)
          ("C-c o c" . org-capture)
          ("C-c o a" . org-agenda)
@@ -223,6 +239,12 @@
   :config
   (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-ts-mode)))
 
+(use-package python
+  :config
+  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
+  :custom
+  (python-indent-guess-indent-offset nil))
+
 ;; Custom settings for C/C++
 (use-package c-ts-mode
   :custom
@@ -255,20 +277,19 @@
   (json-ts-mode-indent-offset 8))
 
 ;; Color theme
-(use-package doom-themes
-  :straight t
-  :commands (doom-themes-visual-bell-config doom-themes-org-config)
-  :custom
-  (doom-vibrant-brighter-comments t)
-  (doom-themes-enable-bold t)
-  (doom-themes-enable-italic t)
-  (doom-vibrant-brighter-comments t)
-  (doom-vibrant-brighter-modeline t)
-  (doom-vibrant-padded-modeline t)
-  :init
-  (load-theme 'doom-vibrant t)
-  (doom-themes-visual-bell-config)
-  (doom-themes-org-config))
+;; (use-package doom-themes
+;;   :straight t
+;;   :commands (doom-themes-visual-bell-config doom-themes-org-config)
+;;   :custom
+;;   (doom-themes-enable-bold t)
+;;   (doom-themes-enable-italic t)
+;;   (doom-outrun-electric-brighter-comments t)
+;;   (doom-outrun-electric-padded-modeline t)
+;;   (doom-outrun-electric-brighter-modeline t)
+;;   :init
+;;   (load-theme 'doom-outrun-electric t)
+;;   (doom-themes-visual-bell-config)
+;;   (doom-themes-org-config))
 
 ;; LSP Mode
 (use-package lsp-mode
@@ -529,12 +550,12 @@
   (([remap scroll-down-command] . golden-ratio-scroll-screen-down)
    ([remap scroll-up-command] . golden-ratio-scroll-screen-up)))
 
-(use-package doom-modeline
-  :straight t
-  :commands (doom-modeline-mode)
-  :init (doom-modeline-mode 1)
-  :custom
-  (doom-modeline-vcs-max-length 30))
+;; (use-package doom-modeline
+;;   :straight t
+;;   :commands (doom-modeline-mode)
+;;   :init (doom-modeline-mode 1)
+;;   :custom
+;;   (doom-modeline-vcs-max-length 30))
 
 (use-package corfu-terminal
   :straight t
@@ -551,17 +572,44 @@
   :init
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-(use-package git-gutter
-  :straight t
-  :commands (global-git-gutter-mode)
-  :init
-  (global-git-gutter-mode +1))
-
 (use-package exec-path-from-shell
   :straight t
   :config
   (dolist (var '("LANG" "SSH_AUTH_SOCK"))
     (add-to-list 'exec-path-from-shell-variables var))
   (exec-path-from-shell-initialize))
+
+(use-package embark
+  :straight t
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+  ;; Show the Embark target at point via Eldoc. You may adjust the
+  ;; Eldoc strategy, if you want to see the documentation from
+  ;; multiple providers. Beware that using this can be a little
+  ;; jarring since the message shown in the minibuffer can be more
+  ;; than one line, causing the modeline to move up and down:
+
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+  :config
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :straight t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package inf-ruby
+  :straight t)
 
 ;;; Init.el ends here
