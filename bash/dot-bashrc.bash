@@ -25,9 +25,6 @@ fi
 TTY=$(tty)
 export GPG_TTY=$TTY
 
-# SSH agent
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-
 # Customize prompt
 MAGENTA="\[$(tput setaf 5)\]"
 RED="\[$(tput setaf 1)\]"
