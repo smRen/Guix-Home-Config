@@ -71,8 +71,8 @@
 
     ;; Set fonts
   (add-to-list 'default-frame-alist
-	       '(font . "Hack Nerd Font-11"))
-  (set-face-attribute 'default t :font "Hack Nerd Font-11")
+	       '(font . "Hack-11"))
+  (set-face-attribute 'default t :font "Hack-11")
 
   ;; Start emacs maximized
   (add-to-list 'initial-frame-alist '(fullscreen . maximized))
