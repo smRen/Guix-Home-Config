@@ -41,6 +41,7 @@
                                            "moonlight-qt"
                                            "mpv"
                                            "neovim"
+                                           "perl"
                                            "python-wrapper"
                                            "ruby"
                                            "node"
