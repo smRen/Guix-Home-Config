@@ -41,6 +41,8 @@
                                            "moonlight-qt"
                                            "mpv"
                                            "neovim"
+                                           "python-wrapper"
+                                           "ruby"
                                            "node"
                                            "tree"
                                            "ungoogled-chromium-wayland"
