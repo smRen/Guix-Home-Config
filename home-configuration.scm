@@ -10,6 +10,7 @@
              (gnu services)
              (guix gexp)
              (gnu home services shells)
+             (gnu home services ssh)
              (gnu home services dotfiles))
 
 (home-environment
@@ -63,4 +64,10 @@
   (list (service home-dotfiles-service-type
                  (home-dotfiles-configuration
                   (layout 'stow)
-                  (directories '("./Dotfiles")))))))
+                  (directories '("./Dotfiles"))))
+
+        (service home-openssh-service-type)
+                 
+        (service home-ssh-agent-service-type
+              (home-ssh-agent-configuration
+               (extra-options '("-t" "12h")))))))
