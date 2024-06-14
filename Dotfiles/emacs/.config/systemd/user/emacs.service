@@ -1,0 +1,15 @@
+[Unit]
+Description=Emacs text editor
+Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/env emacs --daemon
+ExecStop=/usr/bin/env emacsclient --eval "(kill-emacs)"
+Environment=SSH_AUTH_SOCK=%t/keyring/ssh
+Environment=COLORTERM=truecolor
+Environment=LANG=en_US.UTF-8
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

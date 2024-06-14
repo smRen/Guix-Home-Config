@@ -1,0 +1,19 @@
+FROM quay.io/toolbx/arch-toolbox:latest
+
+# Parallel arch downloads and colored output
+RUN sed -i "s/ParallelDownloads = 5/ParallelDownloads = 20/" /etc/pacman.conf \
+	&& sed -i "s/#Color/Color/" /etc/pacman.conf \
+	# Initialize pacman
+	&& pacman-key --init \
+	&& pacman-key --populate archlinux \
+	&& pacman -Sy \
+	&& pacman -S --noconfirm \
+	# System packages
+	archlinux-keyring libvterm \
+	# Container packages
+	podman slirp4netns podman-compose podman-docker \
+	# Development packages
+	cmake ninja clang nodejs npm \
+	bash-language-server yaml-language-server\
+	# Gui and terminal tools
+	emacs-wayland neovim htop tmux kitty unrar ttf-hack

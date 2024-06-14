@@ -1,0 +1,17 @@
+FROM quay.io/toolbx/arch-toolbox:latest
+
+RUN sed -i "s/#Color/Color/" /etc/pacman.conf \
+    && pacman-key --init \
+    && pacman-key --populate archlinux \
+    && pacman -Sy \
+    && pacman -S --noconfirm \
+    # System packages
+    archlinux-keyring nfs-utils libvterm intel-media-driver libva-utils intel-gpu-tools wlroots \
+    # Virtualization
+    virt-manager \
+    # Development packages
+    cmake ninja nodejs clang npm shellcheck shfmt\
+    vscode-html-languageserver vscode-json-languageserver bash-language-server yaml-language-server jedi-language-server \
+    lua-language-server python-lsp-server typescript-language-server \
+    # Gui and terminal tools
+    emacs-wayland neovim chromium firefox htop tmux kitty stow mpv unrar noto-fonts noto-fonts-emoji noto-fonts-cjk ttf-hack ttf-hack-nerd dolphin plasma-workspace
