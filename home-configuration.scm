@@ -7,10 +7,12 @@
 (use-modules (gnu home)
 	     (gnu home services)
              (gnu packages)
+             (gnu packages gnupg)
              (gnu services)
              (guix gexp)
              (gnu home services shells)
              (gnu home services ssh)
+             (gnu home services gnupg)
              (gnu home services dotfiles))
 
 (home-environment
@@ -32,6 +34,10 @@
 					   "libva-utils"
 					   "ncurses"
 					   "pinentry"
+                                           "pinentry-emacs"
+                                           "pinentry-gnome3"
+                                           "pinentry-tty"
+                                           "pinentry-qt"
  					   "gcc-toolchain"
  					   "make"
                                            "bash-completion"
@@ -67,7 +73,16 @@
                   (directories '("./Dotfiles"))))
 
         (service home-openssh-service-type)
-                 
+
+        (service home-gpg-agent-service-type
+                 (home-gpg-agent-configuration
+                  (default-cache-ttl 34560000)
+                  (max-cache-ttl 34560000)
+                  (default-cache-ttl-ssh 34560000)
+                  (max-cache-ttl-ssh 34560000)
+                  (pinentry-program
+                   (file-append pinentry "/bin/pinentry-emacs"))))
+
         (service home-ssh-agent-service-type
               (home-ssh-agent-configuration
                (extra-options '("-t" "12h")))))))
