@@ -81,7 +81,8 @@
                   (default-cache-ttl-ssh 34560000)
                   (max-cache-ttl-ssh 34560000)
                   (pinentry-program
-                   (file-append pinentry "/bin/pinentry-emacs"))))
+                   (file-append pinentry-gnome3 "/bin/pinentry-gnome3"))
+                  ))
 
         (service home-ssh-agent-service-type
               (home-ssh-agent-configuration
