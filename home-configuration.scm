@@ -7,14 +7,37 @@
 (use-modules (gnu home)
 	     (gnu home services)
              (gnu packages)
+             (gnu packages gnupg)
              (gnu services)
              (guix gexp)
-             (gnu home services shells))
+             (gnu home services shells)
+             (gnu home services ssh)
+             (gnu home services gnupg)
+             (gnu home services dotfiles))
 
 (home-environment
  ;; Below is the list of packages that will show up in your
  ;; Home profile, under ~/.guix-home/profile.
  (packages (specifications->packages (list "cmake"
+					   "flatpak"
+					   "font-google-noto"
+					   "font-google-noto-emoji"
+					   "font-google-noto-sans-cjk"
+					   "font-google-noto-serif-cjk"
+					   "font-hack"
+					   "gnome-tweaks"
+					   "gnupg"
+					   "htop"
+					   "igt-gpu-tools"
+					   "intel-media-driver-nonfree"
+                                           "kitty"
+					   "libva-utils"
+					   "ncurses"
+					   "pinentry"
+                                           "pinentry-emacs"
+                                           "pinentry-gnome3"
+                                           "pinentry-tty"
+                                           "pinentry-qt"
  					   "gcc-toolchain"
  					   "make"
                                            "bash-completion"
@@ -24,11 +47,16 @@
                                            "google-chrome-stable"
                                            "libvterm"
                                            "moonlight-qt"
+                                           "mpv"
                                            "neovim"
+                                           "perl"
+                                           "python-wrapper"
+                                           "ruby"
                                            "node"
                                            "tree"
                                            "ungoogled-chromium-wayland"
                                            "virt-manager"
+                                           "yt-dlp"
                                            "zsh"
                                            "zsh-autopair"
                                            "zsh-autosuggestions"
@@ -39,34 +67,23 @@
  ;; Below is the list of Home services.  To search for available
  ;; services, run 'guix home search KEYWORD' in a terminal.
  (services
-  (list (service home-bash-service-type
-                 (home-bash-configuration
-                  (guix-defaults? #f)
-                  (bashrc (list (local-file
-                                 "bash/dot-bashrc.bash")))
-                  (bash-profile (list (local-file
-                                       "bash/dot-bash_profile.bash")))))
+  (list (service home-dotfiles-service-type
+                 (home-dotfiles-configuration
+                  (layout 'stow)
+                  (directories '("./Dotfiles"))))
 
-        (service home-xdg-configuration-files-service-type
-                 ;; Neovim config
-		 `(("nvim/coc-settings.json" ,(local-file "nvim/coc-settings.json"))
-		   ("nvim/init.vim" ,(local-file "nvim/init.vim"))
-		   ;; Git config
-                   ("git/config" ,(local-file "git/gitconfig"))
-                   ;; Kitty config
-                   ("kitty/kitty.conf" ,(local-file "kitty/kitty.conf"))
-                   ;; Mpv config
-                   ("mpv/scripts/nextfile.lua" ,(local-file "mpv/scripts/nextfile.lua"))
-		   ("mpv/input.conf" ,(local-file "mpv/input.conf"))
-		   ("mpv/mpv.conf" ,(local-file "mpv/mpv.conf"))))
-        
-	(service home-files-service-type
-                 ;; Git prompt
-		 `(("Scripts/git-prompt.sh" ,(local-file "scripts/git-prompt.sh"))
-		   ;; Emacs config
-                   (".emacs.d/init.el" ,(local-file "emacs/init.el"))
-		   (".emacs.d/early-init.el" ,(local-file "emacs/early-init.el"))
-                   (".emacs.d/straight/versions/default.el" ,(local-file "emacs/straight/versions/default.el"))
-		   ;; GPG
-                   (".gnupg/gpg-agent.conf" ,(local-file "gpg/gpg-agent.conf"))
-                   (".gnupg/gpg.conf" ,(local-file "gpg/gpg.conf")))))))
+        (service home-openssh-service-type)
+
+        (service home-gpg-agent-service-type
+                 (home-gpg-agent-configuration
+                  (default-cache-ttl 34560000)
+                  (max-cache-ttl 34560000)
+                  (default-cache-ttl-ssh 34560000)
+                  (max-cache-ttl-ssh 34560000)
+                  (pinentry-program
+                   (file-append pinentry-gnome3 "/bin/pinentry-gnome3"))
+                  ))
+
+        (service home-ssh-agent-service-type
+              (home-ssh-agent-configuration
+               (extra-options '("-t" "12h")))))))

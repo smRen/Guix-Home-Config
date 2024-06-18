@@ -1,0 +1,3 @@
+moonlight-qt-bin
+yay-bin
+yay-bin-debug

@@ -1,0 +1,25 @@
+swipe:
+  4:
+    right: 
+      sendkey: "LEFTMETA+LEFTCTRL+LEFT"
+    left: 
+      sendkey: "LEFTMETA+LEFTCTRL+RIGHT"
+    up:
+      sendkey: "LEFTCTRL+F8"
+    down:
+      sendkey: "LEFTCTRL+F9"
+  3:
+    left:
+      sendkey: "LEFTALT+RIGHT"
+    right:
+      sendkey: "LEFTALT+LEFT"
+    up:
+      sendkey: "LEFTCTRL+F8"
+    down:
+      sendkey: "LEFTCTRL+F9"
+
+threshold:
+  swipe: 0.2
+
+interval:
+  swipe: 1.2

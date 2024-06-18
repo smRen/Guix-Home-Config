@@ -1,0 +1,1 @@
+CHROMIUM_FLAGS="--force-device-scale-factor=1.2 --ignore-gpu-blocklist --enable-gpu-rasterization --enable-zero-copy --use-gl=desktop --disable-gpu-driver-bug-workarounds	--force-dark-mode --enable-features=WebUIDarkMode"
