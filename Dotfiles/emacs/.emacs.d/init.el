@@ -162,22 +162,15 @@
         (shell . t)
         (python . t)
         (js . t)
-<<<<<<< HEAD:emacs/init.el
-=======
-        (ruby . t)
->>>>>>> origin/development:Dotfiles/emacs/.emacs.d/init.el
         (C . t)))
   :custom
   (org-directory "~/Projects/Org")
   (org-default-notes-file (concat org-directory "/notes.org"))
   (org-confirm-babel-evaluate nil)
-<<<<<<< HEAD:emacs/init.el
-=======
   (org-agenda-start-with-log-mode t)
   (org-log-done 'time)
   (org-log-into-drawer t)
   (org-list-allow-alphabetical t)
->>>>>>> origin/development:Dotfiles/emacs/.emacs.d/init.el
   :bind (("C-c o s" . org-store-link)
          ("C-c o c" . org-capture)
          ("C-c o a" . org-agenda)
