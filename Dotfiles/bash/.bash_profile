@@ -9,6 +9,8 @@ eval "$(guix package --search-paths \
 # Prepend setuid programs.
 export PATH=/run/setuid-programs:$PATH:$PATH_ORIGINAL
 
+[[ -r "$HOME/.bashrc" ]] && . "$HOME/.bashrc"
+
 # Add paths
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
