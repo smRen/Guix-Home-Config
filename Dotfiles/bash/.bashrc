@@ -100,3 +100,8 @@ vterm_cmd() {
 
     vterm_printf "51;E$vterm_elisp"
 }
+
+export SSL_CERT_DIR="$HOME/.guix-home/profile/etc/ssl/certs/"
+export SSL_CERT_FILE="$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt"
+export GIT_SSL_CAINFO="$SSL_CERT_FILE"
+export GUIX_LOCPATH="$HOME/.guix-home/profile/lib/locale/"
