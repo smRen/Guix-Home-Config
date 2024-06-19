@@ -27,6 +27,8 @@
 					   "font-hack"
 					   "gnome-tweaks"
 					   "gnupg"
+                                           "glibc-locales"
+                                           "nss-certs"
 					   "htop"
 					   "igt-gpu-tools"
 					   "intel-media-driver-nonfree"
@@ -74,16 +76,6 @@
 
         (service home-openssh-service-type)
 
-        (service home-gpg-agent-service-type
-                 (home-gpg-agent-configuration
-                  (default-cache-ttl 34560000)
-                  (max-cache-ttl 34560000)
-                  (default-cache-ttl-ssh 34560000)
-                  (max-cache-ttl-ssh 34560000)
-                  (pinentry-program
-                   (file-append pinentry-gnome3 "/bin/pinentry-gnome3"))
-                  ))
-
         (service home-ssh-agent-service-type
-              (home-ssh-agent-configuration
-               (extra-options '("-t" "12h")))))))
+                 (home-ssh-agent-configuration
+                  (extra-options '("-t" "12h")))))))
