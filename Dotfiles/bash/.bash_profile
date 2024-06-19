@@ -11,6 +11,8 @@ export PATH=/run/setuid-programs:$PATH:$PATH_ORIGINAL
 
 [[ -r "$HOME/.bashrc" ]] && . "$HOME/.bashrc"
 
+eval `keychain --eval id_rsa`
+
 # Add paths
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"

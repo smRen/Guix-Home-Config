@@ -56,6 +56,7 @@
                                            "ruby"
                                            "node"
                                            "tree"
+                                           "keychain"
                                            "ungoogled-chromium-wayland"
                                            "virt-manager"
                                            "yt-dlp"
@@ -72,10 +73,4 @@
   (list (service home-dotfiles-service-type
                  (home-dotfiles-configuration
                   (layout 'stow)
-                  (directories '("./Dotfiles"))))
-
-        (service home-openssh-service-type)
-
-        (service home-ssh-agent-service-type
-                 (home-ssh-agent-configuration
-                  (extra-options '("-t" "12h")))))))
+                  (directories '("./Dotfiles")))))))

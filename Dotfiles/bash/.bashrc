@@ -21,9 +21,17 @@ elif [[ "$DISTRIBUTION_NAME" == *"Ubuntu"* ]]; then
     . /usr/share/bash-completion/completions/fzf
 fi
 
-#GPG allow input of passphrase in tty
+# GPG allow input of passphrase in tty
 TTY=$(tty)
 export GPG_TTY=$TTY
+
+# SSH-agent
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    ssh-agent -t 1h > "$XDG_RUNTIME_DIR/ssh-agent.env"
+fi
+if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
+    source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+fi
 
 # Customize prompt
 MAGENTA="\[$(tput setaf 5)\]"
